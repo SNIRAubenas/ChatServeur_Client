@@ -120,7 +120,7 @@ namespace ChatClient
             System.Drawing.Font currentFont = richMessages.SelectionFont;
             System.Drawing.FontStyle newFontStyle;
             newFontStyle = FontStyle.Bold;
-            richMessages.SelectionFont = new Font( currentFont, newFontStyle );
+            richMessages.SelectionFont = new Font(currentFont, newFontStyle);
             //
             beforeAppend = this.richMessages.TextLength;
             this.richMessages.AppendText(msg.Texte + Environment.NewLine);
@@ -184,6 +184,23 @@ namespace ChatClient
         private void textMessage_KeyDown(object sender, KeyEventArgs e)
         {
 
+        }
+
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void color_btn_Click(object sender, EventArgs e)
+        {
+            this.colorDialog1 = new ColorDialog();
+            if (this.colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var client in clients.Keys.ToList())
+                {
+                    clients[client] = this.colorDialog1.Color;
+                }
+            }
         }
     }
 }
