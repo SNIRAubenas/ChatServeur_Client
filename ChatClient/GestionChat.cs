@@ -27,6 +27,34 @@ namespace ChatClient
         public AutoResetEvent signalementMessage { get; internal set; }
         public AutoResetEvent signalementSortie { get; internal set; }
 
+        public int Id { get; set; }
+        public string Texte { get; set; }
+        public byte[] ImageData { get; set; }
+
+        // Propriété pour récupérer et définir l'image
+        public Image Image
+        {
+            get
+            {
+                if (ImageData != null)
+                {
+                    using (var ms = new MemoryStream(ImageData))
+                    {
+                        return Image.FromStream(ms);
+                    }
+                }
+                return null;
+            }
+            set
+            {
+                using (var ms = new MemoryStream())
+                {
+                    value.Save(ms, System.Drawing.Imaging.ImageFormat.Png);  // Convertir l'image en PNG
+                    ImageData = ms.ToArray();  // Sauvegarder en bytes
+                }
+            }
+        }
+
         public bool Connected
         {
             get
