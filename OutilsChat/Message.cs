@@ -128,6 +128,7 @@ namespace OutilsChat
         }
 
         public Image Image { get; set; }
+        public byte[] PixelData { get; set; }
 
         public String this[ int num ]
         {
@@ -141,6 +142,16 @@ namespace OutilsChat
         {
             this.Command = Constants.CMD_MSG;
             this.Param1 = alias;
+        }
+
+        public string[] Split(char v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool StartsWith(string v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

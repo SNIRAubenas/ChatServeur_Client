@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OutilsChat;
@@ -19,42 +19,71 @@ namespace ChatClient
         private Dictionary<int, Color> clients;
         private Button buttonsendimage;
 
+        private void InsertImageInRichTextBox(Image image)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                byte[] imageBytes = ms.ToArray();
+                string base64Image = Convert.ToBase64String(imageBytes);
+                string rtfImage = @"{\pict\pngblip " + BitConverter.ToString(imageBytes).Replace("-", "") + "}";
+                this.richMessages.SelectedRtf = rtfImage;
+            }
+        }
+
+        public bool IsBase64String(string str)
+        {
+            if (str == null)
+                return false;
+
+            str = str.Trim();
+            if (str.Length % 4 != 0)
+                return false;
+
+            return Regex.IsMatch(str, @"^[a-zA-Z0-9\+/]*={0,2}$");
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             comm = null;
-            //
             configFile = new IniFile(AppDomain.CurrentDomain.BaseDirectory + "config.ini");
             int port = configFile.ReadValue("Server", "Port", 18);
             String ipAddress = configFile.ReadValue("Server", "IPAddress", "127.0.0.1");
-            String alias = configFile.ReadValue("User", "Alias", "jean Reno ");
+            String alias = configFile.ReadValue("User", "Alias", "jean chaineDBeat");
             //
             this.numericPort.Value = port;
             this.ipAddressControl1.IPAddress = ipAddress;
             this.textAlias.Text = alias;
-            //
             this.Text += " " + Constants.APP_VERSION;
             this.clients = new Dictionary<int, Color>();
         }
 
+        public static string ImageToBase64(Image image)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                byte[] imageBytes = ms.ToArray();
+                return Convert.ToBase64String(imageBytes);
+            }
+        }
+
         private void buttonStart_Click(object sender, EventArgs e)
         {
-            // Démarrage de connection
             if (comm == null)
             {
                 configFile = new IniFile(AppDomain.CurrentDomain.BaseDirectory + "config.ini");
                 configFile.WriteValue("Server", "Port", (int)this.numericPort.Value);
                 configFile.WriteValue("Server", "IPAddress", this.ipAddressControl1.IPAddress);
                 configFile.WriteValue("User", "Alias", this.textAlias.Text);
-                //
                 this.comm = new GestionChat(this.ipAddressControl1.IPAddress, (int)this.numericPort.Value, this.textAlias.Text);
                 this.comm.OnMessageReceived += new OnMessageReceived(this.OnMessageReceived);
                 this.comm.OnClientDisconnected += new OnClientDisconnected(this.OnClientDisconnected);
                 this.comm.Start();
-                //
+
                 if (this.comm.Connected)
                 {
-                    //
                     this.ipAddressControl1.Enabled = false;
                     this.numericPort.Enabled = false;
                     this.textAlias.Enabled = false;
@@ -74,14 +103,11 @@ namespace ChatClient
 
         private void OnClientDisconnected(GestionChat sender)
         {
-            // !!! ATTENTION !!!
-            // A ce stade on est "encore" dans le contexte d'execution du Thread Réseau
             this.Invoke((OnClientDisconnected)this.DoClientDisconnected, new object[] { sender });
         }
 
         private void DoClientDisconnected(GestionChat sender)
         {
-            // On remet tout en place
             this.ipAddressControl1.Enabled = true;
             this.numericPort.Enabled = true;
             this.textAlias.Enabled = true;
@@ -95,60 +121,62 @@ namespace ChatClient
 
         private void OnMessageReceived(GestionChat sender, OutilsChat.Message message)
         {
-            // !!! ATTENTION !!!
-            // A ce stade on est "encore" dans le contexte d'execution du Thread Réseau
             this.Invoke((OnMessageReceived)this.DoMessageReceived, new object[] { sender, message });
         }
 
         private void DoMessageReceived(GestionChat sender, OutilsChat.Message message)
         {
-            // Client déjà connu ?
-            if (!clients.ContainsKey(message.Id))
+            if (IsBase64String(message.Texte))
             {
-                clients.Add(message.Id, this.RandomColor());
-            }
-            //
-            this.AjoutMessage(message, this.clients[message.Id]);
-
-
-
-
-            //cgpt
-
-            // Si le message contient une image, affichez-la
-            if (message.Image != null)
-            {
-                // Afficher l'image reçue
-                PictureBox pictureBox = new PictureBox
+                try
                 {
-                    Image = message.Image,
-                    SizeMode = PictureBoxSizeMode.Zoom,
-                    Size = new Size(200, 200),
-                    Location = new Point(10, richMessages.Bottom + 10)  // Positionner sous le message texte
-                };
-                this.Controls.Add(pictureBox);
+                    byte[] imageBytes = Convert.FromBase64String(message.Texte);
+
+                    if (imageBytes.Length == 0)
+                    {
+                        this.AfficherErreur("Le message ne contient pas d'image valide.");
+                        return;
+                    }
+
+                    using (MemoryStream ms = new MemoryStream(imageBytes))
+                    {
+                        Image image = Image.FromStream(ms);
+
+                        if (image == null)
+                        {
+                            this.AfficherErreur("Erreur lors de la création de l'image.");
+                            return;
+                        }
+
+                        DisplayImageInPictureBox(image);
+                    }
+                }
+                catch (FormatException ex)
+                {
+                    Console.WriteLine($"Erreur de format Base64 : {ex.Message}");
+                    this.AfficherErreur("Erreur de format Base64.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erreur lors de la conversion Base64 en image : {ex.Message}");
+                    this.AfficherErreur("Erreur de réception de l'image.");
+                }
             }
             else
             {
-                // Si ce n'est pas une image, c'est un message texte
-                this.AjoutMessage(message, Color.Black);
+                AjoutMessage(message, this.clients[message.Id]);
             }
-
         }
 
         private void AjoutMessage(OutilsChat.Message msg, Color clr)
         {
-            //
             int beforeAppend = this.richMessages.TextLength;
             this.richMessages.AppendText(msg.Param1 + " - " + DateTime.Now.ToString() + Environment.NewLine);
             int afterAppend = this.richMessages.TextLength;
             this.richMessages.Select(beforeAppend, afterAppend - beforeAppend);
             this.richMessages.SelectionColor = clr;
             System.Drawing.Font currentFont = richMessages.SelectionFont;
-            System.Drawing.FontStyle newFontStyle;
-            newFontStyle = FontStyle.Bold;
-            richMessages.SelectionFont = new Font(currentFont, newFontStyle);
-            //
+            richMessages.SelectionFont = new Font(currentFont, FontStyle.Bold);
             beforeAppend = this.richMessages.TextLength;
             this.richMessages.AppendText(msg.Texte + Environment.NewLine);
             afterAppend = this.richMessages.TextLength;
@@ -178,10 +206,8 @@ namespace ChatClient
 
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Fermeture !! Arret du client
             if (comm != null)
             {
-                // Si on laisse le traitement de l'evenement, on va revenir vers la fenetre alors qu'elle n'existera plus
                 this.comm.OnClientDisconnected = null;
                 this.comm.Stop();
             }
@@ -189,7 +215,6 @@ namespace ChatClient
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            // Fermeture !! Arret du client
             if (comm != null)
             {
                 this.comm.Stop();
@@ -201,7 +226,6 @@ namespace ChatClient
             if (comm != null)
             {
                 this.comm.Ecrire(this.textMessage.Text);
-                //
                 OutilsChat.Message newMessage = new OutilsChat.Message(0, this.textMessage.Text);
                 newMessage.Envoi(this.textAlias.Text);
                 this.AjoutMessage(newMessage, Color.Black);
@@ -224,37 +248,43 @@ namespace ChatClient
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                // Filtre pour les fichiers image
                 openFileDialog.Filter = "Images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg";
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Charger l'image sélectionnée
                     Image selectedImage = Image.FromFile(openFileDialog.FileName);
-
-                    // Créer un message avec l'image
+                    string imageBase64 = ImageToBase64(selectedImage);
                     OutilsChat.Message imageMessage = new OutilsChat.Message(0, "[Image envoyée]");
-                    imageMessage.Image = selectedImage;  // Définir l'image dans le message
-
-                    // Envoyer via GestionChat
+                    imageMessage.Texte = imageBase64;
                     if (comm != null)
                     {
-                        comm.Ecrire(imageMessage);  // Méthode qui gère l'envoi des messages
+                        comm.Ecrire(imageMessage.Texte);
                     }
-
-                    
 
                     // Afficher l'image localement (dans l'interface)
                     PictureBox pictureBox = new PictureBox
                     {
                         Image = selectedImage,
                         SizeMode = PictureBoxSizeMode.Zoom,
-                        Size = new Size(200, 200),
-                        Location = new Point(10, richMessages.Bottom + 10)  // Positionner en dessous des messages
+                        Size = new Size(100, 100),
+                        Location = new Point(600, richMessages.Bottom + 10)
                     };
                     this.Controls.Add(pictureBox);
                 }
             }
         }
+
+        private void DisplayImageInPictureBox(Image image)
+        {
+            PictureBox pictureBox = new PictureBox
+            {
+                Image = image,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Size = new Size(200, 200),
+                Location = new Point(this.ClientSize.Width - 210, 10)
+            };
+
+            this.Controls.Add(pictureBox);
+        }
     }
-}
+}//

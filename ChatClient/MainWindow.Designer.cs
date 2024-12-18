@@ -100,9 +100,9 @@
             label4.Location = new Point(218, 59);
             label4.Margin = new Padding(4, 0, 4, 0);
             label4.Name = "label4";
-            label4.Size = new Size(38, 15);
+            label4.Size = new Size(45, 15);
             label4.TabIndex = 5;
-            label4.Text = "Alias :";
+            label4.Text = "Psedo :";
             // 
             // textAlias
             // 
@@ -190,6 +190,7 @@
             // 
             // textMessage
             // 
+            textMessage.Cursor = Cursors.IBeam;
             textMessage.Enabled = false;
             textMessage.Location = new Point(14, 454);
             textMessage.Margin = new Padding(4);
@@ -201,6 +202,7 @@
             // 
             // buttonEnvoi
             // 
+            buttonEnvoi.Cursor = Cursors.Hand;
             buttonEnvoi.Enabled = false;
             buttonEnvoi.Location = new Point(486, 472);
             buttonEnvoi.Margin = new Padding(4);
@@ -215,7 +217,7 @@
             // 
             statusBar.ImageScalingSize = new Size(20, 20);
             statusBar.Items.AddRange(new ToolStripItem[] { statusBarInfo });
-            statusBar.Location = new Point(0, 574);
+            statusBar.Location = new Point(0, 576);
             statusBar.Name = "statusBar";
             statusBar.Padding = new Padding(1, 0, 17, 0);
             statusBar.Size = new Size(736, 22);
@@ -244,7 +246,8 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(579, 596);
+            ClientSize = new Size(736, 596);
+            Controls.Add(image_btn);
             Controls.Add(statusBar);
             Controls.Add(buttonEnvoi);
             Controls.Add(label3);
