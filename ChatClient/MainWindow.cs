@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -240,6 +241,8 @@ namespace ChatClient
                     {
                         comm.Ecrire(imageMessage);  // Méthode qui gère l'envoi des messages
                     }
+
+                    
 
                     // Afficher l'image localement (dans l'interface)
                     PictureBox pictureBox = new PictureBox
