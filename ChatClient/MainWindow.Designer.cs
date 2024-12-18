@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             Label label3;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             groupBox1 = new GroupBox();
             color_btn = new Button();
             label4 = new Label();
@@ -45,10 +46,12 @@
             statusBar = new StatusStrip();
             statusBarInfo = new ToolStripStatusLabel();
             colorDialog1 = new ColorDialog();
+            image_btn = new PictureBox();
             label3 = new Label();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericPort).BeginInit();
             statusBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)image_btn).BeginInit();
             SuspendLayout();
             // 
             // label3
@@ -215,7 +218,7 @@
             statusBar.Location = new Point(0, 574);
             statusBar.Name = "statusBar";
             statusBar.Padding = new Padding(1, 0, 17, 0);
-            statusBar.Size = new Size(579, 22);
+            statusBar.Size = new Size(736, 22);
             statusBar.TabIndex = 5;
             statusBar.Text = "statusStrip1";
             // 
@@ -224,11 +227,23 @@
             statusBarInfo.Name = "statusBarInfo";
             statusBarInfo.Size = new Size(0, 17);
             // 
+            // image_btn
+            // 
+            image_btn.BorderStyle = BorderStyle.Fixed3D;
+            image_btn.Cursor = Cursors.Hand;
+            image_btn.Image = (Image)resources.GetObject("image_btn.Image");
+            image_btn.Location = new Point(559, 454);
+            image_btn.Name = "image_btn";
+            image_btn.Size = new Size(24, 24);
+            image_btn.SizeMode = PictureBoxSizeMode.StretchImage;
+            image_btn.TabIndex = 6;
+            image_btn.TabStop = false;
+            image_btn.Click += pictureBox1_Click;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FloralWhite;
             ClientSize = new Size(579, 596);
             Controls.Add(statusBar);
             Controls.Add(buttonEnvoi);
@@ -246,6 +261,7 @@
             ((System.ComponentModel.ISupportInitialize)numericPort).EndInit();
             statusBar.ResumeLayout(false);
             statusBar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)image_btn).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -268,6 +284,7 @@
         private System.Windows.Forms.TextBox textAlias;
         private Button color_btn;
         private ColorDialog colorDialog1;
+        private PictureBox image_btn;
     }
 }
 

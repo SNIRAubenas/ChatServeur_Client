@@ -16,6 +16,7 @@ namespace ChatClient
         private GestionChat comm;
         private IniFile configFile;
         private Dictionary<int, Color> clients;
+        private Button buttonsendimage;
 
         public MainWindow()
         {
@@ -107,6 +108,31 @@ namespace ChatClient
             }
             //
             this.AjoutMessage(message, this.clients[message.Id]);
+
+
+
+
+            //cgpt
+
+            // Si le message contient une image, affichez-la
+            if (message.Image != null)
+            {
+                // Afficher l'image reçue
+                PictureBox pictureBox = new PictureBox
+                {
+                    Image = message.Image,
+                    SizeMode = PictureBoxSizeMode.Zoom,
+                    Size = new Size(200, 200),
+                    Location = new Point(10, richMessages.Bottom + 10)  // Positionner sous le message texte
+                };
+                this.Controls.Add(pictureBox);
+            }
+            else
+            {
+                // Si ce n'est pas une image, c'est un message texte
+                this.AjoutMessage(message, Color.Black);
+            }
+
         }
 
         private void AjoutMessage(OutilsChat.Message msg, Color clr)
@@ -181,16 +207,6 @@ namespace ChatClient
             }
         }
 
-        private void textMessage_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
-
-        private void groupBox2_Enter(object sender, EventArgs e)
-        {
-
-        }
-
         private void color_btn_Click(object sender, EventArgs e)
         {
             this.colorDialog1 = new ColorDialog();
@@ -199,6 +215,41 @@ namespace ChatClient
                 foreach (var client in clients.Keys.ToList())
                 {
                     clients[client] = this.colorDialog1.Color;
+                }
+            }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                // Filtre pour les fichiers image
+                openFileDialog.Filter = "Images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Charger l'image sélectionnée
+                    Image selectedImage = Image.FromFile(openFileDialog.FileName);
+
+                    // Créer un message avec l'image
+                    OutilsChat.Message imageMessage = new OutilsChat.Message(0, "[Image envoyée]");
+                    imageMessage.Image = selectedImage;  // Définir l'image dans le message
+
+                    // Envoyer via GestionChat
+                    if (comm != null)
+                    {
+                        comm.Ecrire(imageMessage);  // Méthode qui gère l'envoi des messages
+                    }
+
+                    // Afficher l'image localement (dans l'interface)
+                    PictureBox pictureBox = new PictureBox
+                    {
+                        Image = selectedImage,
+                        SizeMode = PictureBoxSizeMode.Zoom,
+                        Size = new Size(200, 200),
+                        Location = new Point(10, richMessages.Bottom + 10)  // Positionner en dessous des messages
+                    };
+                    this.Controls.Add(pictureBox);
                 }
             }
         }

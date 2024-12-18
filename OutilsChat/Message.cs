@@ -127,6 +127,8 @@ namespace OutilsChat
             }
         }
 
+        public Image Image { get; set; }
+
         public String this[ int num ]
         {
             get
