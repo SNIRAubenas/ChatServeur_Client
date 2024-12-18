@@ -286,4 +286,4 @@ namespace ChatClient
             this.Controls.Add(pictureBox);
         }
     }
-}
+}//
