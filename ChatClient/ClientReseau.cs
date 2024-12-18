@@ -119,8 +119,10 @@ namespace ChatClient
                     break;
                 }
                 //message reçu
+             
                 ASCIIEncoding encoder = new ASCIIEncoding();
                 String reception = encoder.GetString(message, 0, bytesRead);
+                
                 // On met le message en attente
                 // On demande un accès aux Messages
                 this.AccessMessages.WaitOne();
@@ -144,7 +146,7 @@ namespace ChatClient
             if (this.Running)
             {
                 ASCIIEncoding encoder = new ASCIIEncoding();
-                byte[] buffer = encoder.GetBytes(msg);
+                byte[] buffer = encoder.GetBytes(msg );
                 this.clientStream.Write(buffer, 0, buffer.Length);
             }
         }

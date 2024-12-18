@@ -25,7 +25,7 @@ namespace ChatClient
             configFile = new IniFile(AppDomain.CurrentDomain.BaseDirectory + "config.ini");
             int port = configFile.ReadValue("Server", "Port", 18);
             String ipAddress = configFile.ReadValue("Server", "IPAddress", "127.0.0.1");
-            String alias = configFile.ReadValue("User", "Alias", "jean chaineDBeat");
+            String alias = configFile.ReadValue("User", "Alias", "jean Reno ");
             //
             this.numericPort.Value = port;
             this.ipAddressControl1.IPAddress = ipAddress;
